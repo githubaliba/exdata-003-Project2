@@ -1,26 +1,38 @@
-dataDir = "./data"
-if(!file.exists(dataDir)) {dir.create(dataDir)}
-fileUrl1="https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
-fileName1="NEIData.zip"
-filePath1=paste0("./data/",fileName1)
-download.file(fileUrl1,filePath1)
-unzip(filePath1,exdir=dataDir)
+##Part 0: Download and Unzip Data
+if(!file.exists("./data")){dir.create("./data")}
+fileUrl1 = "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+fileName1 = "NEIData.zip"
+filePath1 = paste("./data/",fileName1,sep="")
+if(!file.exists(filePath1)) 
+{
+  download.file(fileUrl1,destfile=filePath1)
+  unzip("./data/NEIData.zip",exdir="./data")
+}
 
-NEI <- readRDS("data//summarySCC_PM25.rds")
-SCC <- readRDS("data//Source_Classification_Code.rds")
-
-NEI$year <- as.factor(NEI$year)
-NEI$type <- as.factor(NEI$type)
-NEI$Pollutant <- as.factor(NEI$Pollutant)
+## This first line will likely take a few seconds. Be patient!
+if(!exists('NEI')) {
+  NEI <- readRDS("data//summarySCC_PM25.rds")
+  NEI <- NEI[,c(1,2,4,5,6)]
+  NEI$year <- as.factor(NEI$year)
+  NEI$type <- as.factor(NEI$type)
+}
+if(!exists('SCC')) {SCC <- readRDS("data//Source_Classification_Code.rds")}
 
 plot1 <- aggregate(Emissions ~ year, NEI, sum)
-barplot(plot1$Emissions,names=plot1$year)
+barplot(plot1$Emissions,names=plot1$year, ylab=expression("Total Emissions, PM"[2.5]),xlab="Year",
+        main=expression('All sources by year, Total emissions, PM'[2.5]))
 
 plot2 <- aggregate(Emissions ~ year, NEI[NEI$fips=="24510",], sum)
-barplot(plot2$Emissions,names=plot2$year)
+barplot(plot2$Emissions,names=plot2$year, ylab=expression("Total Emissions, Baltimore City, PM"[2.5]),xlab="Year",
+        main=expression('All sources by year, Baltimore City, Total emissions, PM'[2.5]))
 
-plot3 <- aggregate(Emissions ~ year + type, NEI, sum)
-
+plot3 <- aggregate(Emissions ~ year + type, NEI[NEI$fips=="24510",], sum)
+gg3 <- qplot(year,Emissions,data=plot3,facets=.~type)
+gg3 <- gg3 + ylab(expression("Total Emissions, Baltimore City, PM"[2.5]))
+gg3 <- gg3 + xlab("Year of Observation")
+gg3 <- gg3 + ggtitle(expression("Total Emissions, Baltimore City, By Emission Type, PM"[2.5]))
+gg3 <- gg3 + geom_point(size=8,aes(color=type))
+gg3
 
 #SCC[grepl('[C|c]oal',SCC$EI.Sector),]$EI.Sector
 #SCC[grepl('[C|c]oal',SCC$EI.Sector),]$SCC
@@ -29,4 +41,10 @@ plot4NEI <- NEI[NEI$SCC %in% SCC[grepl('[C|c]oal',SCC$EI.Sector),]$SCC,]
 
 
 
+
+
+
+
 plot6NEI <- NEI[NEI$fips=="24510"|NEI$fips=="06037",]
+#plot6 <- aggregate(Emissions ~ year + type + fips, plot6NEI, sum)
+#qplot(year,Emissions,data=plot6,facets=type~fips)
