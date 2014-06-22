@@ -21,11 +21,19 @@ if(!exists('NEI')) {
 }
 if(!exists('SCC')) {SCC <- readRDS("data//Source_Classification_Code.rds")}
 
-
-
 ##Generate Plot
+onRoadNEI <- NEI[NEI$SCC %in% SCC[SCC$Data.Category=="Onroad",]$SCC,]
+plot5NEI <- onRoadNEI[onRoadNEI$fips=="24510",]
+plot5Melt <- melt(plot5NEI)
+plot5yearType <- dcast(plot5Melt, year+SCC~variable,fun.aggregate=sum)
+fig5_byscc <- ggplot(data=plot5yearType, aes(y=Emissions,x=year,fill=SCC)) + geom_bar(stat="identity") + theme(legend.position="none")
+fig5_byscc <- fig5_byscc + ylab(expression("Motor Vehicle (On-Road) Related Emissions"))
+fig5_byscc <- fig5_byscc + xlab("Year of Observation")
+fig5_byscc <- fig5_byscc + ggtitle(expression("Baltimore City On-Road Related Emissions by Year (color coded to SCC)"))
+
 
 ##Save Plot
 if(!file.exists("./figs")){dir.create("./figs")}
-dev.copy(png,"./figs/plot5.png")
+png("./figs/plot5.png",height=600,width=800)
+fig5_byscc
 dev.off()

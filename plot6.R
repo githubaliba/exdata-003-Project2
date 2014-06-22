@@ -26,8 +26,26 @@ if(!exists('SCC')) {SCC <- readRDS("data//Source_Classification_Code.rds")}
 
 
 ##Generate Plot
+onRoadNEI <- NEI[NEI$SCC %in% SCC[SCC$Data.Category=="Onroad",]$SCC,]
+plot6NEI <- onRoadNEI[onRoadNEI$fips=="24510"|onRoadNEI$fips=="06037",]
+plot6Melt <- melt(plot6NEI)
+plot6yearType <- dcast(plot6Melt, year+SCC+fips~variable,fun.aggregate=sum)
+fig6_byscc <- ggplot(data=plot6yearType, aes(y=Emissions,x=year,fill=SCC)) + geom_bar(stat="identity") + theme(legend.position="none")
+fig6_byscc <- fig6_byscc + ylab(expression("Motor Vehicle (On-Road) Related Emissions"))
+fig6_byscc <- fig6_byscc + xlab("Year of Observation")
+fig6_byscc <- fig6_byscc + ggtitle(expression("On-Road Related Emissions by Year (color coded to SCC)"))
+fipLabeler <- function(var,value) {
+  value <- as.character(value)
+  if(var=="fips") {
+    value[value=="06037"] <- "Los Angeles"
+    value[value=="24510"] <- "Baltimore City"
+  }
+  return(value)
+}
+fig6_byscc <- fig6_byscc + facet_grid(.~fips,labeller=fipLabeler)
 
 ##Save Plot
 if(!file.exists("./figs")){dir.create("./figs")}
-dev.copy(png,"./figs/plot6.png")
+png("./figs/plot6.png",height=600,width=800)
+fig6_byscc
 dev.off()

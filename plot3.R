@@ -26,15 +26,15 @@ if(!exists('SCC')) {SCC <- readRDS("data//Source_Classification_Code.rds")}
 
 ##Generate Plot
 plot3 <- aggregate(Emissions ~ year + type, NEI[NEI$fips=="24510",], sum)
-gg3 <- qplot(year,Emissions,data=plot3,facets=.~type)
-gg3 <- gg3 + ylab(expression("Total Emissions, Baltimore City, PM"[2.5]))
-gg3 <- gg3 + xlab("Year of Observation")
-gg3 <- gg3 + ggtitle(expression("Total Emissions, Baltimore City, By Emission Type, PM"[2.5]))
-gg3 <- gg3 + geom_point(size=8,aes(color=type))
-gg3
+fig3 <- qplot(year,Emissions,data=plot3,facets=.~type)
+fig3 <- fig3 + ylab(expression("Total Emissions, Baltimore City, PM"[2.5]))
+fig3 <- fig3 + xlab("Year of Observation")
+fig3 <- fig3 + ggtitle(expression("Total Emissions, Baltimore City, By Emission Type, PM"[2.5]))
+fig3 <- fig3 + geom_point(size=8,aes(color=type))
+fig3
 
 ##Save Plot
 if(!file.exists("./figs")){dir.create("./figs")}
 png("./figs/plot3.png",height=600,width=800)
-gg3
+fig3
 dev.off()

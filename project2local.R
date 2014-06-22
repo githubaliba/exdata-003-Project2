@@ -38,13 +38,31 @@ gg3
 #SCC[grepl('[C|c]oal',SCC$EI.Sector),]$SCC
 
 plot4NEI <- NEI[NEI$SCC %in% SCC[grepl('[C|c]oal',SCC$EI.Sector),]$SCC,]
+plot4 <- aggregate(Emissions ~ year, plot4NEI, sum)
+#qplot(year,Emissions,data=plot4)
+qplot(year,Emissions,data=plot4,geom="bar",stat="identity")
+
+library(reshape2)
+plot4Melt <- melt(plot4NEI)
+plot4yearType <- dcast(plot4Melt, year+SCC~variable,fun.aggregate=sum)
+ggplot(data=plot4yearType, aes(y=Emissions,x=year,fill=SCC)) + geom_bar(stat="identity") + theme(legend.position="none")
+
+plot4yearType <- dcast(plot4Melt, year+SCC~variable,fun.aggregate=sum)
+fig4_byscc <- ggplot(data=plot4yearType, aes(y=Emissions,x=year,fill=SCC)) + geom_bar(stat="identity") + theme(legend.position="none")
+fig4_byscc <- fig4_byscc + ylab(expression("Coal Related Emissions"))
+fig4_byscc <- fig4_byscc + xlab("Year of Observation")
+fig4_byscc <- fig4_byscc + ggtitle(expression("US Coal Related Emissions by Year (color coded to SCC"))
 
 
 
 
+onRoadNEI <- NEI[NEI$SCC %in% SCC[SCC$Data.Category=="Onroad",]$SCC,]
+plot5NEI <- onRoadNEI[onRoadNEI$fips=="24510",]
+plot5Melt <- melt(plot5NEI)
 
 
 
-plot6NEI <- NEI[NEI$fips=="24510"|NEI$fips=="06037",]
+onRoadNEI <- NEI[NEI$SCC %in% SCC[SCC$Data.Category=="Onroad",]$SCC,]
+plot6NEI <- onRoadNEI[onRoadNEI$fips=="24510"|onRoadNEI$fips=="06037",]
 #plot6 <- aggregate(Emissions ~ year + type + fips, plot6NEI, sum)
 #qplot(year,Emissions,data=plot6,facets=type~fips)
